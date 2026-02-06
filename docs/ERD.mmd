@@ -1,0 +1,81 @@
+erDiagram
+    PRODUCT {
+      BIGINT id PK "Product PK"
+      VARCHAR sku_master "Master SKU code"
+      VARCHAR name
+      TEXT description
+      JSON attributes "flex schema: specs, tags"
+      DATETIME created_at
+      DATETIME updated_at
+    }
+
+    SKU {
+      BIGINT id PK
+      BIGINT product_id FK
+      VARCHAR sku_code
+      VARCHAR barcode
+      JSON sku_attributes
+      DECIMAL weight
+      DECIMAL length
+      DATETIME created_at
+    }
+
+    CATEGORY {
+      BIGINT id PK
+      VARCHAR name
+      TEXT description
+    }
+
+    PRODUCT_CATEGORY {
+      BIGINT product_id FK
+      BIGINT category_id FK
+    }
+
+    INVENTORY_LOCATION {
+      BIGINT id PK
+      VARCHAR code
+      VARCHAR name
+      VARCHAR type
+      JSON metadata
+    }
+
+    INVENTORY_ITEM {
+      BIGINT id PK
+      BIGINT sku_id FK
+      BIGINT location_id FK
+      INT quantity
+      JSON lots_batches
+      DATETIME last_counted_at
+    }
+
+    STOCK_TRANSACTION {
+      BIGINT id PK
+      BIGINT inventory_item_id FK
+      VARCHAR txn_type
+      INT qty_delta
+      DATETIME txn_at
+      JSON metadata
+    }
+
+    SUPPLIER {
+      BIGINT id PK
+      VARCHAR name
+      JSON contact
+    }
+
+    PURCHASE_ORDER {
+      BIGINT id PK
+      BIGINT supplier_id FK
+      VARCHAR po_number
+      JSON lines
+      VARCHAR status
+    }
+
+    PRODUCT ||--o{ SKU : "has"
+    PRODUCT ||--o{ PRODUCT_CATEGORY : "categorized"
+    CATEGORY ||--o{ PRODUCT_CATEGORY : "contains"
+    SKU ||--o{ INVENTORY_ITEM : "stocked_as"
+    INVENTORY_LOCATION ||--o{ INVENTORY_ITEM : "holds"
+    INVENTORY_ITEM ||--o{ STOCK_TRANSACTION : "changes"
+    SUPPLIER ||--o{ PURCHASE_ORDER : "supplies"
+    PURCHASE_ORDER ||--o{ STOCK_TRANSACTION : "creates"
