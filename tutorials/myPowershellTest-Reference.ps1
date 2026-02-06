@@ -15,6 +15,22 @@ try {
     $connection.Open()
     Write-Host "Successfully connected to MySQL server"
     
+    # Example: Execute a query
+    $command = $connection.CreateCommand()
+    $command.CommandText = "SELECT VERSION();"
+    $result = $command.ExecuteScalar()
+    Write-Host "MySQL Version: $result"
+    
+    $connection.Close()
+} catch {
+    Write-Host "Connection failed: $_"
+}
+
+try {
+    $connection = New-Object MySql.Data.MySqlClient.MySqlConnection($connectionString)
+    $connection.Open()
+    Write-Host "Successfully connected to MySQL server"
+    
     # Create a test table
     $command = $connection.CreateCommand()
     $command.CommandText = @"
