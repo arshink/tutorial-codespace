@@ -80,9 +80,9 @@ CREATE TABLE supplier (
 
 CREATE TABLE purchase_order (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  supplier_id BIGINT NOT NULL,
+  supplier_id BIGINT,
   po_number VARCHAR(100) NOT NULL,
-  lines JSON NULL,
+  po_lines JSON NULL,
   status VARCHAR(50),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (supplier_id) REFERENCES supplier(id) ON DELETE SET NULL
