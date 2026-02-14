@@ -1,0 +1,142 @@
+
+!
+! Last configuration change at 10:16:35 TST Sun Mar 30 2025 by arshin
+! NVRAM config last updated at 10:16:37 TST Sun Mar 30 2025 by arshin
+! NVRAM config last updated at 10:16:37 TST Sun Mar 30 2025 by arshin
+version 15.1
+service timestamps debug datetime msec
+service timestamps log datetime msec localtime show-timezone year
+service password-encryption
+!
+hostname DC-R2811
+!
+boot-start-marker
+boot-end-marker
+!
+!
+!
+no aaa new-model
+!
+clock timezone TST 0 30
+!
+dot11 syslog
+ip source-route
+!
+!
+ip cef
+!
+ip domain name 0940net.ir
+ip name-server 10.10.100.31
+ip name-server 10.10.100.32
+no ipv6 cef
+!
+multilink bundle-name authenticated
+!
+voice-card 0
+!
+crypto pki token default removal timeout 0
+!
+
+license udi pid CISCO2811 sn FTX1323A0NN
+
+redundancy
+!
+!
+ip ssh version 2
+! 
+!
+interface FastEthernet0/0
+ description DC-2960S-P25-Inside_T
+ no ip address
+ duplex auto
+ speed auto
+!
+interface FastEthernet0/0.88
+ description INET-Inside_T
+ encapsulation dot1Q 88
+ ip address 185.128.48.1 255.255.252.0
+!
+interface FastEthernet0/0.93
+ description Hiweb-Inside_T
+ encapsulation dot1Q 93
+ ip address 31.214.248.161 255.255.255.248
+!
+interface FastEthernet0/1
+ description DC-2960S-P26-Outside_U
+ ip address 10.233.240.34 255.255.255.252
+ duplex auto
+ speed auto
+!
+interface FastEthernet0/1/0
+ description DC-2960S-P6-NMS
+ ip address 10.10.100.15 255.255.255.0
+ duplex auto
+ speed auto
+!
+router bgp 52049
+ bgp router-id 10.10.100.15
+ bgp log-neighbor-changes
+ network 185.128.48.0 mask 255.255.252.0
+ neighbor 10.233.240.33 remote-as 60976
+!
+ip forward-protocol nd
+no ip http server
+no ip http secure-server
+!
+!
+control-plane
+!
+mgcp profile default
+!
+!
+line con 0
+ logging synchronous
+ login local
+line aux 0
+line vty 0 4
+ exec-timeout 60 0
+ logging synchronous
+ login local
+ transport input ssh
+!
+scheduler allocate 20000 1000
+ntp server 10.10.100.11
+ntp server 10.10.100.12 prefer
+end
+!
+! Reflexive Access Lists Configuration
+!
+ip access-list extended OUTBOUND_F01
+ permit ip any any
+!
+ip access-list extended INBOUND_F01
+ permit tcp any 185.128.48.0 0.0.3.255 eq 53
+ permit udp any 185.128.48.0 0.0.3.255 eq 53
+ permit tcp any 185.128.48.0 0.0.3.255 eq 25
+ permit tcp any 31.214.248.160 0.0.0.7 eq 47
+ permit tcp any 31.214.248.160 0.0.0.7 eq 1723
+ permit icmp 200.0.0.5 255.255.255.255 any
+ permit icmp 173.0.0.3 255.255.255.255 any
+ permit tcp any any eq 80
+ permit tcp any any eq 443
+ permit tcp any any eq 3000
+ permit udp any any eq 3001
+ permit tcp any any eq 3002
+ permit udp any any eq 3002
+ permit tcp any reflect OUTBOUND_TRAFFIC
+ permit udp any reflect OUTBOUND_TRAFFIC
+ deny ip any any
+!
+ip access-list extended OUTBOUND_REFLEXIVE
+ permit tcp any any reflect OUTBOUND_TRAFFIC
+ permit udp any any reflect OUTBOUND_TRAFFIC
+!
+interface FastEthernet0/1
+ ip access-group INBOUND_F01 in
+ ip access-group OUTBOUND_REFLEXIVE out
+!
+interface FastEthernet0/0.88
+ ip access-group OUTBOUND_REFLEXIVE out
+!
+interface FastEthernet0/0.93
+ ip access-group OUTBOUND_REFLEXIVE out
